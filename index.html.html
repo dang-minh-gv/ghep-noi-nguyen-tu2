@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trò chơi ghép nối - Cấu tạo nguyên tử</title>
+    <!-- Sử dụng font chữ Nunito cho phong cách giáo dục thân thiện -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-orange: #FF9800;
+            --primary-yellow: #FFC107;
+            --primary-blue: #2196F3;
+            --dark-blue: #1565C0;
+            --card-blue-start: #42A5F5;
+            --card-blue-end: #1E88E5;
+            --card-pink-start: #EC407A;
+            --card-pink-end: #D81B60;
+            --success-green: #4CAF50;
+            --bg-color: #f0f4f8;
+            --text-main: #333;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.15);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: #e0eafc;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(255, 255, 255, 0.4), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.4), transparent 25%);
+            background-attachment: fixed;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text-main);
+        }
+
+        /* ================= KHUNG TRÒ CHƠI ================= */
+        .game-container {
+            width: 100%;
+            max-width: 1100px;
+            background: #ffffff;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            margin-top: 10px;
+            border: 4px solid #fff;
+        }
+
+        /* */
+        /* ================= TIÊU ĐỀ ================= */
+        .header {
+            background: linear-gradient(135deg, var(--primary-orange), var(--primary-yellow));
+            color: white;
+            text-align: center;
+            padding: 25px 20px;
+            position: relative;
+            border-bottom: 4px solid rgba(0,0,0,0.05);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 18px;
+            font-weight: 600;
+            opacity: 0.9;
+            background: rgba(0,0,0,0.1);
+            display: inline-block;
+            padding: 4px 15px;
+            border-radius: 20px;
+        }
+
+        /* ================= THANH THÔNG TIN ================= */
+        .stats {
+            background: linear-gradient(90deg, var(--dark-blue), var(--primary-blue));
+            color: white;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 15px 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            min-width: 160px;
+            justify-content: center;
+        }
+
+        /* ================= HƯỚNG DẪN ================= */
+        .instruction-container {
+            padding: 20px;
+            background: #f8fbff;
+        }
+
+        .instruction {
+            background: #fff4e5;
+            color: #d35400;
+            padding: 15px 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            border-left: 6px solid var(--primary-orange);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .message {
+            text-align: center;
+            min-height: 28px;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--dark-blue);
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        /* */
+        /* ================= KHU VỰC GHÉP NỐI ================= */
+        .game-board {
+            display: grid;
+            grid-template-columns: 4fr 5.5fr; /* Cột phải rộng hơn cột trái để chứa chữ dài */
+            gap: 30px;
+            padding: 10px 30px 30px;
+            background: #f8fbff;
+        }
+
+        .column {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-md);
+            border: 2px solid #eef2f6;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .col-left {
+            border-top: 6px solid var(--primary-blue);
+        }
+
+        .col-right {
+            border-top: 6px solid var(--card-pink-start);
+        }
+
+        .column-title {
+            text-align: center;
+            font-weight: 800;
+            font-size: 20px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px dashed #ddd;
+        }
+
+        .col-left .column-title { color: var(--dark-blue); }
+        .col-right .column-title { color: var(--card-pink-end); }
+
+        /* ================= THẺ ================= */
+        .card {
+            flex: 1;
+            min-height: 55px;
+            padding: 12px 18px;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 600;
+            line-height: 1.4;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            user-select: none;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.15);
+            position: relative;
+            top: 0;
+        }
+
+        .left-card {
+            background: linear-gradient(135deg, var(--card-blue-start), var(--card-blue-end));
+            border: 1px solid #1976D2;
+        }
+
+        .right-card {
+            background: linear-gradient(135deg, var(--card-pink-start), var(--card-pink-end));
+            border: 1px solid #C2185B;
+            text-align: left; /* Căn trái cho các câu định nghĩa dài */
+            justify-content: flex-start;
+            padding: 12px 20px;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 0 rgba(0,0,0,0.15), 0 8px 15px rgba(0,0,0,0.1);
+            filter: brightness(1.1);
+        }
+
+        .card:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.15);
+            top: 2px;
+        }
+
+        .card.selected {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 0 0 4px var(--primary-yellow), 0 8px 15px rgba(0,0,0,0.2);
+            z-index: 2;
+        }
+
+        .card.correct {
+            background: linear-gradient(135deg, #4CAF50, #388E3C) !important;
+            border-color: #2E7D32;
+            animation: correctPulse 0.6s ease;
+            cursor: default;
+            opacity: 0.9;
+            pointer-events: none;
+            box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+            transform: translateY(2px);
+        }
+
+        .card.wrong {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+            background: linear-gradient(135deg, #F44336, #D32F2F) !important;
+        }
+
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); filter: brightness(1.2); }
+            100% { transform: scale(1) translateY(2px); }
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+            40%, 60% { transform: translate3d(6px, 0, 0); }
+        }
+
+        /* */
+        /* ================= NÚT ================= */
+        .controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 0 20px 30px;
+            background: #f8fbff;
+        }
+
+        button {
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            color: white;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 rgba(0,0,0,0.2), 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+        }
+
+        .start-btn { background: linear-gradient(135deg, #4CAF50, #2E7D32); }
+        .restart-btn { background: linear-gradient(135deg, #F44336, #C62828); }
+        .hint-btn { background: linear-gradient(135deg, var(--primary-yellow), #FF9800); color: #333; }
+        .rank-btn { background: linear-gradient(135deg, #9C27B0, #6A1B9A); }
+        .edit-btn { background: linear-gradient(135deg, #607D8B, #455A64); }
+
+        /* ================= MODAL ================= */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            width: 100%;
+            max-width: 450px;
+            background: white;
+            border-radius: 24px;
+            padding: 35px 25px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 5px solid var(--primary-yellow);
+        }
+
+        @keyframes modalPop {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .modal h2 {
+            color: var(--primary-orange);
+            margin-bottom: 20px;
+            font-size: 26px;
+            font-weight: 800;
+        }
+
+        .modal p {
+            margin: 12px 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .modal input {
+            width: 90%;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 12px;
+            border: 2px solid #ddd;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .modal input:focus {
+            border-color: var(--primary-blue);
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .ranking-list {
+            text-align: left;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .rank-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f4f6f9;
+            margin: 10px 0;
+            padding: 12px 15px;
+            border-radius: 12px;
+            font-weight: 700;
+            border-left: 5px solid var(--primary-blue);
+        }
+        
+        .rank-item:nth-child(1) { border-left-color: gold; background: #fffcf0;}
+        .rank-item:nth-child(2) { border-left-color: silver; background: #f5f5f5;}
+        .rank-item:nth-child(3) { border-left-color: #cd7f32; background: #fdf5ef;}
+
+        /* ================= CHỈNH SỬA ================= */
+        .edit-list {
+            max-height: 50vh;
+            overflow-y: auto;
+            margin: 15px 0;
+            padding-right: 10px;
+            text-align: left;
+        }
+        .edit-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .edit-row input {
+            margin: 0 !important;
+            padding: 10px !important;
+            font-size: 14px !important;
+        }
+        .edit-term { flex: 1; }
+        .edit-def { flex: 2; }
+        .remove-btn {
+            background: #F44336;
+            padding: 10px;
+            min-width: 40px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* ================= RESPONSIVE ================= */
+        @media(max-width: 768px) {
+            .game-board {
+                grid-template-columns: 4fr 5.5fr;
+                gap: 10px;
+                padding: 10px 5px 20px;
+            }
+            .column {
+                padding: 10px;
+                gap: 8px;
+            }
+            .column-title {
+                font-size: 14px;
+            }
+
+Để giữ 2 cột song song ngay cả trên màn hình nhỏ (như khi bạn đang xem ở không gian màn hình bên phải hoặc trên điện thoại), chúng ta cần đổi `grid-template-columns: 1fr;` thành `1fr 1fr`. Đồng thời, giảm một chút khoảng cách và thu nhỏ chữ tiêu đề để nội dung không bị quá chật chội." type="suggestion">
+            .header h1 { font-size: 24px; }
+            .header p { font-size: 14px; }
+            .stat-box { font-size: 14px; min-width: 140px; }
+            .card { font-size: 14px; padding: 10px; }
+            .controls { flex-direction: column; align-items: stretch; padding: 0 15px 20px;}
+            button { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- TIÊU ĐỀ -->
+        <div class="header">
+            <h1>⚛️ TRÒ CHƠI GHÉP NỐI 🧪</h1>
+            <p>Cấu tạo nguyên tử - Hóa học 10</p>
+        </div>
+
+        <!-- THÔNG TIN -->
+        <div class="stats">
+            <div class="stat-box">⏱ <span id="time">00:00</span></div>
+            <div class="stat-box">⭐ Điểm: <span id="score">0</span></div>
+            <div class="stat-box">🎯 <span id="matched">0</span>/10 Ghép</div>
+        </div>
+
+        <!-- HƯỚNG DẪN -->
+        <div class="instruction-container">
+            <div class="instruction">
+                💡 Hướng dẫn: Chọn một thẻ ở cột <b>Kiến thức (Xanh)</b>, sau đó chọn nội dung tương ứng ở cột <b>Định nghĩa (Hồng)</b>.
+            </div>
+            <div class="message" id="message">Nhấn BẮT ĐẦU để chơi ngay!</div>
+        </div>
+
+        <!-- BẢNG TRÒ CHƠI -->
+        <div class="game-board">
+            <div class="column col-left">
+                <div class="column-title">📘 Kiến thức – Thuật ngữ</div>
+                <div id="leftColumn"></div>
+            </div>
+
+            <div class="column col-right">
+                <div class="column-title">🌸 Định nghĩa – Đặc điểm</div>
+                <div id="rightColumn"></div>
+            </div>
+        </div>
+
+        <!-- NÚT ĐIỀU KHIỂN -->
+        <div class="controls">
+            <button class="start-btn" onclick="startGame()">▶ BẮT ĐẦU</button>
+            <button class="restart-btn" onclick="restartGame()">🔄 CHƠI LẠI</button>
+            <button class="hint-btn" onclick="showHint()">💡 GỢI Ý</button>
+            <button class="rank-btn" onclick="showRanking()">🏆 XẾP HẠNG</button>
+            <button class="edit-btn" onclick="openEditModal()">⚙️ TÙY CHỈNH</button>
+        </div>
+    </div>
+
+    <!-- MODAL HOÀN THÀNH -->
+    <div class="modal" id="finishModal">
+        <div class="modal-content">
+            <h2>🎉 XUẤT SẮC! 🎉</h2>
+            <p>Bạn đã hoàn thành thử thách!</p>
+            <div style="background: #f0f8ff; padding: 15px; border-radius: 10px; margin: 15px 0;">
+                <p>⭐ Điểm tổng: <b id="finalScore" style="color: var(--primary-orange); font-size: 20px;"></b></p>
+                <p>⏱ Thời gian: <b id="finalTime"></b></p>
+            </div>
+            
+            <input type="text" id="playerName" placeholder="Nhập tên của bạn để lưu kỷ lục">
+            
+            <div class="modal-buttons">
+                <button class="start-btn" onclick="saveScore()">💾 LƯU KẾT QUẢ</button>
+                <button class="restart-btn" onclick="closeModal()">ĐÓNG</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL TÙY CHỈNH -->
+    <div class="modal" id="editModal">
+        <div class="modal-content" style="max-width: 700px;">
+            <h2>⚙️ TÙY CHỈNH NỘI DUNG</h2>
+            <p>Thay đổi thuật ngữ và định nghĩa theo ý muốn của bạn.</p>
+            <div class="edit-list" id="editList"></div>
+            <div class="modal-buttons">
+                <button class="hint-btn" onclick="addPairRow()">➕ THÊM THẺ</button>
+                <button class="start-btn" onclick="savePairs()">💾 LƯU LẠI</button>
+                <button class="restart-btn" onclick="closeEditModal()">HỦY</button>
+            </div>
+            <button class="restart-btn" style="margin-top:15px; width:100%; background: #9e9e9e;" onclick="resetDefaultPairs()">Khôi phục nội dung gốc</button>
+        </div>
+    </div>
+
+    <script>
+        /* ==========================================
+           DỮ LIỆU KIẾN THỨC HÓA HỌC 10
+        ========================================== */
+        const defaultPairs = [
+            { id: 1, term: "Electron (e⁻)", definition: "Hạt mang điện tích âm, chuyển động rất nhanh trong khu vực vỏ nguyên tử." },
+            { id: 2, term: "Proton (p)", definition: "Hạt mang điện tích dương, nằm trong hạt nhân nguyên tử." },
+            { id: 3, term: "Neutron (n)", definition: "Hạt không mang điện, nằm trong hạt nhân nguyên tử." },
+            { id: 4, term: "Hạt nhân nguyên tử", definition: "Gồm proton và neutron, mang điện tích dương." },
+            { id: 5, term: "Số hiệu nguyên tử Z", definition: "Bằng số đơn vị điện tích hạt nhân và bằng số proton trong hạt nhân." },
+            { id: 6, term: "Số khối A", definition: "Tổng số proton và neutron trong hạt nhân nguyên tử." },
+            { id: 7, term: "Nguyên tử trung hòa về điện", definition: "Có tổng điện tích dương của proton bằng tổng điện tích âm của electron, nên số p = số e." },
+            { id: 8, term: "Số neutron N", definition: "Được xác định theo công thức N = A − Z." },
+            { id: 9, term: "Khối lượng nguyên tử", definition: "Tập trung chủ yếu ở hạt nhân vì khối lượng electron rất nhỏ so với proton và neutron." },
+            { id: 10, term: "Khối lượng Electron", definition: "Rất nhỏ, xấp xỉ bằng 1/1836 khối lượng của proton." }
+        ];
+
+        let pairs = JSON.parse(localStorage.getItem("customPairs")) || [...defaultPairs];
+
+        /* ==========================================
+           BIẾN TRÒ CHƠI
+        ========================================== */
+        let selectedLeft = null;
+        let selectedRight = null;
+        let matchedCount = 0;
+        let score = 0;
+        let seconds = 0;
+        let timer = null;
+        let gameStarted = false;
+        let isAnimating = false; // Ngăn người dùng click liên tục khi đang có hiệu ứng sai
+
+        /* ==========================================
+           HÀM XÁO TRỘN
+        ========================================== */
+        function shuffle(array) {
+            let newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        /* ==========================================
+           HIỂN THỊ THẺ
+        ========================================== */
+        function renderCards() {
+            const leftColumn = document.getElementById("leftColumn");
+            const rightColumn = document.getElementById("rightColumn");
+
+            leftColumn.innerHTML = "";
+            rightColumn.innerHTML = "";
+
+            const leftCards = shuffle(pairs);
+            const rightCards = shuffle(pairs);
+
+            leftCards.forEach(item => {
+                const card = document.createElement("div");
+                card.className = "card left-card";
+                card.textContent = item.term;
+                card.dataset.id = item.id;
+                card.onclick = () => selectLeft(card);
+                leftColumn.appendChild(card);
+            });
+
+            rightCards.forEach(item => {
+                const card = document.createElement("div");
+                card.className = "card right-card";
+                card.textContent = item.definition;
+                card.dataset.id = item.id;
+                card.onclick = () => selectRight(card);
+                rightColumn.appendChild(card);
+            });
+        }
+
+        /* */
+        /* ==========================================
+           BẮT ĐẦU TRÒ CHƠI
+        ========================================== */
+        function startGame() {
+            if (gameStarted) return;
+            
+            // Xáo trộn lại nếu đang ở trạng thái chưa chơi nhưng đã render
+            if (matchedCount === 0 && seconds === 0) {
+                 renderCards();
+            }
+
+            gameStarted = true;
+            document.getElementById("message").innerHTML = "🚀 Trò chơi bắt đầu! Chúc bạn may mắn!";
+            document.getElementById("message").style.color = "var(--success-green)";
+
+            timer = setInterval(() => {
+                seconds++;
+                updateTime();
+            }, 1000);
+        }
+
+        /* ==========================================
+           CHỌN THẺ BÊN TRÁI
+        ========================================== */
+        function selectLeft(card) {
+            if (!gameStarted) {
+                showMessage("▶ Hãy nhấn nút BẮT ĐẦU trước khi chơi!", "#F44336");
+                return;
+            }
+            if (isAnimating || card.classList.contains("correct")) return;
+
+            document.querySelectorAll(".left-card").forEach(c => {
+                if (!c.classList.contains("correct")) c.classList.remove("selected");
+            });
+
+            selectedLeft = card;
+            card.classList.add("selected");
+            checkMatch();
+        }
+
+        /* ==========================================
+           CHỌN THẺ BÊN PHẢI
+        ========================================== */
+        function selectRight(card) {
+            if (!gameStarted) {
+                showMessage("▶ Hãy nhấn nút BẮT ĐẦU trước khi chơi!", "#F44336");
+                return;
+            }
+            if (isAnimating || card.classList.contains("correct")) return;
+
+            document.querySelectorAll(".right-card").forEach(c => {
+                if (!c.classList.contains("correct")) c.classList.remove("selected");
+            });
+
+            selectedRight = card;
+            card.classList.add("selected");
+            checkMatch();
+        }
+
+        /* */
+        /* ==========================================
+           KIỂM TRA GHÉP ĐÔI
+        ========================================== */
+        function checkMatch() {
+            if (!selectedLeft || !selectedRight) return;
+
+            const leftId = selectedLeft.dataset.id;
+            const rightId = selectedRight.dataset.id;
+
+            if (leftId === rightId) {
+                // Đúng
+                selectedLeft.classList.remove("selected");
+                selectedRight.classList.remove("selected");
+                
+                selectedLeft.classList.add("correct");
+                selectedRight.classList.add("correct");
+                
+                selectedLeft.innerHTML = `✅ ${selectedLeft.textContent}`;
+                selectedRight.innerHTML = `✅ ${selectedRight.textContent}`;
+
+                matchedCount++;
+                score += 100;
+                showMessage("🎉 Tuyệt vời! Bạn đã ghép đúng.", "var(--success-green)");
+                updateStats();
+
+                selectedLeft = null;
+                selectedRight = null;
+
+                if (matchedCount === pairs.length) {
+                    setTimeout(finishGame, 800);
+                }
+            } else {
+                // Sai
+                isAnimating = true;
+                score = Math.max(0, score - 10);
+                showMessage("❌ Chưa chính xác! Hãy thử lại.", "#F44336");
+                
+                selectedLeft.classList.add("wrong");
+                selectedRight.classList.add("wrong");
+                
+                updateStats();
+
+                setTimeout(() => {
+                    selectedLeft.classList.remove("wrong", "selected");
+                    selectedRight.classList.remove("wrong", "selected");
+                    selectedLeft = null;
+                    selectedRight = null;
+                    isAnimating = false;
+                    showMessage("Hãy chọn cặp thẻ tiếp theo.", "var(--dark-blue)");
+                }, 600);
+            }
+        }
+
+        function showMessage(text, color) {
+            const msgEl = document.getElementById("message");
+            msgEl.innerHTML = text;
+            msgEl.style.color = color;
+        }
+
+        /* ==========================================
+           CẬP NHẬT GIAO DIỆN & ĐỒNG HỒ
+        ========================================== */
+        function updateStats() {
+            document.getElementById("score").textContent = score;
+            document.getElementById("matched").textContent = matchedCount;
+        }
+
+        function updateTime() {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            document.getElementById("time").textContent = 
+                String(minutes).padStart(2, "0") + ":" + String(secs).padStart(2, "0");
+        }
+
+        /* */
+        /* ==========================================
+           GỢI Ý
+        ========================================== */
+        function showHint() {
+            if (!gameStarted) {
+                showMessage("▶ Hãy bắt đầu trò chơi trước!", "#F44336");
+                return;
+            }
+            if (isAnimating) return;
+
+            const unmatched = pairs.filter(pair => {
+                const leftCard = document.querySelector(`.left-card[data-id="${pair.id}"]`);
+                return !leftCard.classList.contains("correct");
+            });
+
+            if (unmatched.length === 0) return;
+
+            // Trừ điểm khi dùng gợi ý (nếu điểm > 0)
+            score = Math.max(0, score - 20);
+            updateStats();
+
+            const hint = unmatched[Math.floor(Math.random() * unmatched.length)];
+            const leftCard = document.querySelector(`.left-card[data-id="${hint.id}"]`);
+            const rightCard = document.querySelector(`.right-card[data-id="${hint.id}"]`);
+
+            leftCard.classList.add("selected");
+            rightCard.classList.add("selected");
+            
+            showMessage("💡 Gợi ý: Hai thẻ đang sáng lên là một cặp!", "#FF9800");
+
+            setTimeout(() => {
+                if(!leftCard.classList.contains("correct")) leftCard.classList.remove("selected");
+                if(!rightCard.classList.contains("correct")) rightCard.classList.remove("selected");
+                if(selectedLeft && selectedLeft !== leftCard) selectedLeft.classList.add("selected");
+                if(selectedRight && selectedRight !== rightCard) selectedRight.classList.add("selected");
+                showMessage("Tiếp tục nào!", "var(--dark-blue)");
+            }, 1500);
+        }
+
+        /* ==========================================
+           CHƠI LẠI
+        ========================================== */
+        function restartGame() {
+            clearInterval(timer);
+            timer = null;
+            selectedLeft = null;
+            selectedRight = null;
+            matchedCount = 0;
+            score = 0;
+            seconds = 0;
+            gameStarted = false;
+            isAnimating = false;
+
+            updateTime();
+            updateStats();
+            showMessage("🔄 Đã xáo trộn thẻ. Nhấn BẮT ĐẦU để chơi!", "var(--dark-blue)");
+            renderCards();
+        }
+
+        /* ==========================================
+           KẾT THÚC
+        ========================================== */
+        function finishGame() {
+            clearInterval(timer);
+            gameStarted = false;
+
+            // Thưởng điểm thời gian (hoàn thành dưới 3 phút (180s) được thưởng)
+            let bonus = Math.max(0, 200 - seconds);
+            score += bonus;
+            updateStats();
+
+            document.getElementById("finalScore").textContent = score + " Điểm";
+            document.getElementById("finalTime").textContent = document.getElementById("time").textContent;
+            document.getElementById("finishModal").style.display = "flex";
+        }
+
+        /* */
+        /* ==========================================
+           QUẢN LÝ MODAL & BẢNG XẾP HẠNG
+        ========================================== */
+        function closeModal() {
+            document.getElementById("finishModal").style.display = "none";
+        }
+        
+        function closeRanking() {
+            document.getElementById("rankingModal").style.display = "none";
+        }
+
+        /* ==========================================
+           QUẢN LÝ TÙY CHỈNH NỘI DUNG (EDIT)
+        ========================================== */
+        function openEditModal() {
+            if(gameStarted) {
+                if(!confirm("Trò chơi đang diễn ra. Bạn có chắc muốn dừng lại để chỉnh sửa không? (Sẽ phải chơi lại từ đầu)")) return;
+            }
+            const editList = document.getElementById("editList");
+            editList.innerHTML = "";
+            pairs.forEach((pair) => {
+                editList.appendChild(createEditRow(pair.term, pair.definition));
+            });
+            document.getElementById("editModal").style.display = "flex";
+        }
+
+        function closeEditModal() {
+            document.getElementById("editModal").style.display = "none";
+        }
+
+        function createEditRow(term = "", definition = "") {
+            const row = document.createElement("div");
+            row.className = "edit-row";
+            row.innerHTML = `
+                <input type="text" class="edit-term" placeholder="Cột xanh (Ví dụ: Oxi)" value="${term}">
+                <input type="text" class="edit-def" placeholder="Cột hồng (Ví dụ: Nguyên tố có Z=8)" value="${definition}">
+                <button class="remove-btn" onclick="this.parentElement.remove()" title="Xóa cặp này">🗑️</button>
+            `;
+            return row;
+        }
+
+        function addPairRow() {
+            document.getElementById("editList").appendChild(createEditRow());
+            const list = document.getElementById("editList");
+            list.scrollTop = list.scrollHeight;
+        }
+
+        function savePairs() {
+            const rows = document.querySelectorAll(".edit-row");
+            let newPairs = [];
+            let idCounter = 1;
+            
+            rows.forEach(row => {
+                const term = row.querySelector(".edit-term").value.trim();
+                const def = row.querySelector(".edit-def").value.trim();
+                if (term !== "" && def !== "") {
+                    newPairs.push({ id: idCounter++, term: term, definition: def });
+                }
+            });
+
+            if (newPairs.length < 2) {
+                alert("Vui lòng nhập ít nhất 2 cặp thẻ để có thể chơi ghép nối!");
+                return;
+            }
+
+            pairs = newPairs;
+            localStorage.setItem("customPairs", JSON.stringify(pairs));
+            closeEditModal();
+            
+            // Xóa điểm & tạo lại game
+            matchedCount = 0;
+            document.getElementById("matched").innerHTML = `0/${pairs.length} Ghép`;
+            restartGame();
+            showMessage("✅ Đã lưu nội dung mới thành công!", "var(--success-green)");
+        }
+
+        function resetDefaultPairs() {
+            if(confirm("Bạn có chắc muốn xóa các chỉnh sửa và khôi phục lại nội dung Hóa học ban đầu không?")) {
+                localStorage.removeItem("customPairs");
+                pairs = [...defaultPairs];
+                closeEditModal();
+                
+                document.getElementById("matched").innerHTML = `0/${pairs.length} Ghép`;
+                restartGame();
+                showMessage("✅ Đã khôi phục nội dung gốc!", "var(--success-green)");
+            }
+        }
+
+        /* ==========================================
+           KHỞI TẠO KHI TẢI TRANG
+        ========================================== */
+        window.onload = function() {
+            renderCards();
+        };
+    </script>
+</body>
+</html>
